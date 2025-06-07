@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let teamData = {};
     // Store DOM elements for rows to easily update cells later
     const trainerRowCells = {};
+    let fixedTrainerColumn; // Will hold the fixed trainer name column element
 
     // Helper function to update the display of a grid cell
     function updateGridCellDisplay(cell, pokemon) {
@@ -56,44 +57,127 @@ document.addEventListener('DOMContentLoaded', () => {
         cell.appendChild(img);
         cell.appendChild(nameSpan);
         cell.title = pokemon.name; // Set tooltip for full name (hover)
+        syncAllRowHeights();
     }
 
-    // --- Phase 1.5: Initial Grid Display (Type Headers) ---
+    // --- Phase 1.5: Initial Grid Display (Restructured for Scrolling) ---
     function initializeGrid() {
-        // +1 for the trainer name column
-        gridContainer.style.gridTemplateColumns = `minmax(150px, 1.5fr) repeat(${POKEMON_TYPES.length}, minmax(120px, 1fr))`;
+        const mainContainer = gridContainer.parentElement; // Should be <main>
+        mainContainer.removeChild(gridContainer); // Temporarily remove original gridContainer
+        gridContainer.innerHTML = ''; // Clear original gridContainer as it will be reused
 
-        // Create header row
-        // First cell is for "Trainer"
+        // Create new structural elements
+        const gridSystemWrapper = document.createElement('div');
+        gridSystemWrapper.id = 'grid-system-wrapper';
+
+        const gridScrollControls = document.createElement('div');
+        gridScrollControls.id = 'grid-scroll-controls';
+
+        const scrollLeftBtn = document.createElement('button');
+        scrollLeftBtn.id = 'scroll-left-btn';
+        scrollLeftBtn.innerHTML = '&lt;'; // <
+        gridScrollControls.appendChild(scrollLeftBtn);
+
+        const scrollRightBtn = document.createElement('button');
+        scrollRightBtn.id = 'scroll-right-btn';
+        scrollRightBtn.innerHTML = '&gt;'; // >
+        gridScrollControls.appendChild(scrollRightBtn);
+
+        const gridLayoutWrapper = document.createElement('div');
+        gridLayoutWrapper.id = 'grid-layout-wrapper';
+
+        fixedTrainerColumn = document.createElement('div'); // Assign to global
+        fixedTrainerColumn.id = 'fixed-trainer-column';
+
+        const scrollableTypesArea = document.createElement('div');
+        scrollableTypesArea.id = 'scrollable-types-area';
+
+        const typeHeadersContainer = document.createElement('div');
+        typeHeadersContainer.id = 'type-headers-container';
+
+        // Assemble the new structure
+        scrollableTypesArea.appendChild(typeHeadersContainer);
+        scrollableTypesArea.appendChild(gridContainer); // gridContainer now holds only Pokémon cells
+
+        gridLayoutWrapper.appendChild(fixedTrainerColumn);
+        gridLayoutWrapper.appendChild(scrollableTypesArea);
+
+        gridSystemWrapper.appendChild(gridScrollControls);
+        gridSystemWrapper.appendChild(gridLayoutWrapper);
+
+        mainContainer.appendChild(gridSystemWrapper); // Add the new system to main
+
+        // Populate Fixed Trainer Column Header
         const nameHeaderCell = document.createElement('div');
         nameHeaderCell.classList.add('grid-header-cell', 'grid-name-header');
         nameHeaderCell.textContent = 'Trainer';
-        gridContainer.appendChild(nameHeaderCell);
+        fixedTrainerColumn.appendChild(nameHeaderCell);
 
+        // Populate Type Headers in Scrollable Area
         POKEMON_TYPES.forEach(type => {
             const headerCell = document.createElement('div');
-            headerCell.classList.add('grid-header-cell');
+            headerCell.classList.add('grid-header-cell', 'type-header-cell'); // Added 'type-header-cell' for specific styling
             headerCell.textContent = type;
-            gridContainer.appendChild(headerCell);
+            typeHeadersContainer.appendChild(headerCell);
         });
+
+        // Configure gridContainer (now for Pokémon cells only) and typeHeadersContainer
+        // They will have one column per Pokémon type.
+        const pokemonCellGridLayout = POKEMON_TYPES.map(() => `minmax(120px, 1fr)`).join(' ');
+        // gridContainer itself should stack rows vertically. Its grid-template-columns are not for individual type cells.
+        // Each pokemon-cells-row will use pokemonCellGridLayout for its own columns.
+        typeHeadersContainer.style.gridTemplateColumns = pokemonCellGridLayout; // Ensure alignment
+        // gridContainer's display:grid is already set via CSS, so that should be fine.
+
+        // Helper function to update scroll button states
+        function updateScrollButtonStates() {
+            const scrollAmount = scrollableTypesArea.clientWidth * 0.8; // Scroll by 80% of visible width
+            // A small tolerance for floating point comparisons
+            const tolerance = 1;
+
+            scrollLeftBtn.disabled = scrollableTypesArea.scrollLeft <= tolerance;
+
+            const maxScrollLeft = scrollableTypesArea.scrollWidth - scrollableTypesArea.clientWidth;
+            scrollRightBtn.disabled = scrollableTypesArea.scrollLeft >= maxScrollLeft - tolerance;
+        }
+
+        // Add event listeners for scroll buttons
+        scrollLeftBtn.addEventListener('click', () => {
+            const scrollAmount = scrollableTypesArea.clientWidth * 0.8;
+            scrollableTypesArea.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            // Update buttons after scroll animation (smooth behavior is async)
+            setTimeout(updateScrollButtonStates, 300); // Adjust timeout if scroll is longer/shorter
+        });
+
+        scrollRightBtn.addEventListener('click', () => {
+            const scrollAmount = scrollableTypesArea.clientWidth * 0.8;
+            scrollableTypesArea.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            // Update buttons after scroll animation
+            setTimeout(updateScrollButtonStates, 300);
+        });
+
+        // Initial state of scroll buttons
+        // Use a small delay to ensure layout is stable for scrollWidth/clientWidth calculations
+        setTimeout(updateScrollButtonStates, 100);
+    setTimeout(syncAllRowHeights, 110); // Sync heights after initial layout
+        // Also listen for window resize if the layout is responsive
+        window.addEventListener('resize', () => setTimeout(updateScrollButtonStates, 100));
     }
 
     // Helper function to create and display a trainer's row in the UI
     function createAndDisplayTrainerRow(trainerName) {
-        const trainerRowWrapper = document.createElement('div');
-        trainerRowWrapper.classList.add('trainer-row-wrapper');
-        // If gridContainer is display:grid, trainerRowWrapper needs to act like a grid row.
-        // display:contents makes its children participate in the parent grid directly.
-        trainerRowWrapper.style.display = 'contents'; 
+        const fixedTrainerColumn = document.getElementById('fixed-trainer-column');
+        if (!fixedTrainerColumn) {
+            console.error('#fixed-trainer-column not found');
+            return;
+        }
 
-        trainerRowCells[trainerName] = {}; // Initialize cell storage for this trainer
+        trainerRowCells[trainerName] = {}; // Initialize cell storage for this trainer's Pokémon cells
 
-        trainerRowCells[trainerName] = {}; // Initialize cell storage for this trainer
-
-        // Create the name cell for the trainer
-        // Create the name cell for the trainer
+        // Create the name cell for the trainer (name and delete button)
         const nameCell = document.createElement('div');
-        nameCell.classList.add('grid-name-cell');
+        nameCell.classList.add('grid-name-cell'); // Existing class for styling
+        nameCell.dataset.trainerName = trainerName; // For easier identification if needed
         
         const nameText = document.createElement('span');
         nameText.textContent = trainerName;
@@ -106,19 +190,31 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteBtn.dataset.trainer = trainerName;
         nameCell.appendChild(deleteBtn);
 
-        trainerRowWrapper.appendChild(nameCell);
+        fixedTrainerColumn.appendChild(nameCell); // Add name cell to the fixed column
 
+        // Create a new row in the scrollable gridContainer for this trainer's Pokémon cells
+        const pokemonCellsRow = document.createElement('div');
+        pokemonCellsRow.classList.add('pokemon-cells-row');
+        pokemonCellsRow.dataset.trainerName = trainerName; // For easier identification / deletion
+        pokemonCellsRow.style.display = 'grid';
+        // Ensure this layout matches typeHeadersContainer and gridContainer's overall column defs for types
+        const typesColumnLayout = POKEMON_TYPES.map(() => `minmax(120px, 1fr)`).join(' '); 
+        pokemonCellsRow.style.gridTemplateColumns = typesColumnLayout;
+        
         // Create a Pokémon cell for each type in this trainer's row
         POKEMON_TYPES.forEach(type => {
-            const pokemonCell = document.createElement('div');
-            pokemonCell.classList.add('grid-pokemon-cell');
-            pokemonCell.dataset.trainer = trainerName; // Store trainer name
-            pokemonCell.dataset.type = type;
-            trainerRowCells[trainerName][type] = pokemonCell; // Store reference
-            trainerRowWrapper.appendChild(pokemonCell);
+            const typeCell = document.createElement('div');
+            typeCell.classList.add('grid-pokemon-cell');
+            typeCell.dataset.trainer = trainerName;
+            typeCell.dataset.type = type;
+            // Store reference for easy access
+            trainerRowCells[trainerName][type] = typeCell;
+            pokemonCellsRow.appendChild(typeCell);
         });
 
-        gridContainer.appendChild(trainerRowWrapper);
+        gridContainer.appendChild(pokemonCellsRow); // Add the row of Pokémon cells to the main scrollable grid
+        syncAllRowHeights(); // Add the row of Pokémon cells to the main scrollable grid
+        saveTeamDataToLocalStorage(); // Save after adding new trainer row structure
     }
 
     // --- Phase 2: Row Management (Adding & Naming Persons) ---
@@ -357,7 +453,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 4.1.2.2. Update the corresponding cell in the main grid
         const targetCell = trainerRowCells[trainerName][pokemonType];
-        updateGridCellDisplay(targetCell, selectedPokemonData);
+
+        // Construct the object for display, ensuring it has an 'id' property
+        const pokemonToDisplay = {
+            id: pokemonId,
+            name: selectedPokemonData.name,
+            image_path: selectedPokemonData.image_path
+        };
+        updateGridCellDisplay(targetCell, pokemonToDisplay);
 
         // 4.1.2.3. Store the selection
         if (!teamData[trainerName]) {
@@ -378,11 +481,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Phase 6.1.1: Save team compositions to localStorage ---
     function saveTeamDataToLocalStorage() {
         const orderedTrainerNameElements = document.querySelectorAll('.grid-name-cell');
-        const trainersOrder = Array.from(orderedTrainerNameElements).map(cell => cell.textContent);
+        const trainersOrder = Array.from(orderedTrainerNameElements).map(cell => {
+            const nameSpan = cell.querySelector('span');
+            return nameSpan ? nameSpan.textContent : ''; 
+        }).filter(name => name !== '');
+
+        const filteredSelections = {};
+        trainersOrder.forEach(trainerName => {
+            if (teamData.hasOwnProperty(trainerName)) {
+                filteredSelections[trainerName] = teamData[trainerName];
+            }
+        });
 
         const dataToSave = {
             trainersOrder: trainersOrder,
-            selections: teamData
+            selections: filteredSelections
         };
 
         try {
@@ -428,40 +541,101 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error('Failed to load or parse team data from localStorage:', e);
         }
+
+
     }
 
-    // --- Handler for Deleting a Trainer ---
-    function handleDeleteTrainer(event) {
-        const trainerNameToDelete = event.target.dataset.trainer;
-        if (!trainerNameToDelete) return;
+function syncAllRowHeights() {
+    // Sync data rows
+    const dataNameCells = Array.from(fixedTrainerColumn.querySelectorAll('.grid-name-cell:not(.grid-name-header)'));
+    const dataPokemonRows = Array.from(gridContainer.querySelectorAll('.pokemon-cells-row')); // gridContainer is #pokemon-grid-container
 
-        if (window.confirm(`Are you sure you want to delete trainer "${trainerNameToDelete}"? This action cannot be undone.`)) {
-            // Find the wrapper for the trainer's row to remove it
-            // The button is inside the name cell, which is inside the wrapper
-            const nameCellElement = event.target.closest('.grid-name-cell');
-            if (nameCellElement && nameCellElement.parentElement.classList.contains('trainer-row-wrapper')) {
-                nameCellElement.parentElement.remove();
-            }
+    const numDataRows = Math.min(dataNameCells.length, dataPokemonRows.length);
+    for (let i = 0; i < numDataRows; i++) {
+        dataNameCells[i].style.height = 'auto'; // Reset to natural height
+        dataPokemonRows[i].style.height = 'auto'; // Reset to natural height
 
-            // Remove data
-            delete teamData[trainerNameToDelete];
-            delete trainerRowCells[trainerNameToDelete];
+        const pokemonRowHeight = dataPokemonRows[i].offsetHeight;
+        const nameCellNaturalHeight = dataNameCells[i].offsetHeight;
 
-            saveTeamDataToLocalStorage();
-            console.log(`Trainer ${trainerNameToDelete} deleted.`);
-        }
+        const targetHeight = Math.max(pokemonRowHeight, nameCellNaturalHeight);
+
+        dataNameCells[i].style.height = `${targetHeight}px`;
+        dataPokemonRows[i].style.height = `${targetHeight}px`; // Ensure Pokémon row also respects this if name cell was taller
     }
+
+    // Sync header row
+    const nameHeader = fixedTrainerColumn.querySelector('.grid-name-header');
+    const typeHeadersContainer = document.getElementById('type-headers-container');
+
+    if (nameHeader && typeHeadersContainer) {
+        nameHeader.style.height = 'auto';
+        typeHeadersContainer.style.height = 'auto';
+
+        const nameHeaderNaturalHeight = nameHeader.offsetHeight;
+        const typeHeadersContainerHeight = typeHeadersContainer.offsetHeight;
+        
+        const targetHeaderHeight = Math.max(nameHeaderNaturalHeight, typeHeadersContainerHeight);
+
+        nameHeader.style.height = `${targetHeaderHeight}px`;
+        typeHeadersContainer.style.height = `${targetHeaderHeight}px`;
+    }
+}
 
     // Initialize the application
     initializeGrid();
     loadTeamDataFromLocalStorage(); // Load any saved data
+
+// --- Handler for Deleting a Trainer ---
+function handleDeleteTrainer(event) {
+const trainerNameToDelete = event.target.dataset.trainer;
+if (!trainerNameToDelete) {
+console.error('Delete button clicked, but no trainerNameToDelete found on dataset.');
+return;
+}
+console.log('[Delete] Attempting to delete trainer:', trainerNameToDelete);
+
+if (window.confirm(`Are you sure you want to delete trainer "${trainerNameToDelete}"? This action cannot be undone.`)) {
+// Remove the trainer's name cell from the fixed column
+const nameCellElement = event.target.closest('.grid-name-cell');
+console.log('[Delete] Found nameCellElement:', nameCellElement);
+if (nameCellElement) {
+nameCellElement.remove();
+} else {
+console.error('[Delete] nameCellElement not found for trainer:', trainerNameToDelete);
+}
+
+// Remove the trainer's row of Pokémon cells from the scrollable gridContainer
+console.log('[Delete] gridContainer:', gridContainer);
+const selector = `.pokemon-cells-row[data-trainer-name="${trainerNameToDelete}"]`;
+console.log('[Delete] Selector for pokemonCellsRowToRemove:', selector);
+const pokemonCellsRowToRemove = gridContainer.querySelector(selector);
+console.log('[Delete] Found pokemonCellsRowToRemove:', pokemonCellsRowToRemove);
+if (pokemonCellsRowToRemove) {
+pokemonCellsRowToRemove.remove();
+} else {
+console.error('[Delete] pokemonCellsRowToRemove not found for trainer:', trainerNameToDelete);
+}
+
+// Remove data from internal tracking
+delete teamData[trainerNameToDelete];
+delete trainerRowCells[trainerNameToDelete];
+
+saveTeamDataToLocalStorage();
+console.log(`Trainer ${trainerNameToDelete} deleted.`);
+syncAllRowHeights();
+}
+}
 
     // --- Phase 6.2.1: Display Team Summary --- 
     function displayTeamSummary() {
         summaryContent.innerHTML = ''; // Clear previous summary
 
         const orderedTrainerNameElements = document.querySelectorAll('.grid-name-cell');
-        const trainersOrder = Array.from(orderedTrainerNameElements).map(cell => cell.textContent);
+        const trainersOrder = Array.from(orderedTrainerNameElements).map(cell => {
+            const nameSpan = cell.querySelector('span');
+            return nameSpan ? nameSpan.textContent : '';
+        }).filter(name => name !== '');
 
         if (trainersOrder.length === 0) {
             summaryContent.innerHTML = '<p>No trainers have been added yet.</p>';
@@ -469,7 +643,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        console.log('Displaying team summary. Current teamData:', JSON.parse(JSON.stringify(teamData)));
         trainersOrder.forEach(trainerName => {
+            console.log(`Processing summary for trainer: '${trainerName}'`);
+            console.log('Trainer data from teamData for this trainer:', teamData[trainerName]);
             const trainerBlock = document.createElement('div');
             trainerBlock.classList.add('summary-trainer-block');
 
@@ -495,8 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     pokemonEntry.appendChild(img);
 
                     const nameSpan = document.createElement('span');
-                    // Displaying type alongside name, as a trainer can have multiple Pokémon of different types
-                    nameSpan.textContent = `${selection.name} (${type})`; 
+                    nameSpan.textContent = selection.name; // Display only the name
                     pokemonEntry.appendChild(nameSpan);
                     pokemonListDiv.appendChild(pokemonEntry);
                 }
@@ -519,7 +695,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Phase 6.2.2: Export Team as Text ---
     function exportTeamAsText() {
         const orderedTrainerNameElements = document.querySelectorAll('.grid-name-cell');
-        const trainersOrder = Array.from(orderedTrainerNameElements).map(cell => cell.textContent);
+        const trainersOrder = Array.from(orderedTrainerNameElements).map(cell => {
+            const nameSpan = cell.querySelector('span');
+            return nameSpan ? nameSpan.textContent : '';
+        }).filter(name => name !== '');
         let textSummary = '';
 
         if (trainersOrder.length === 0) {
@@ -557,13 +736,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Listeners
     addPersonBtn.addEventListener('click', handleAddPerson);
-    gridContainer.addEventListener('click', (event) => {
+    document.addEventListener('click', function(event) {
+        console.log('[Event] Document clicked. Target:', event.target);
         if (event.target.classList.contains('delete-trainer-btn')) {
+            console.log('[Event] Delete button clicked. Target:', event.target);
             handleDeleteTrainer(event);
         } else if (event.target.closest('.grid-pokemon-cell')) {
+            console.log('[Event] Grid cell clicked. Target:', event.target);
             handleGridCellClick(event);
         }
     }); // Combined listener for grid cell clicks and delete button clicks
+    console.log('CONFIRMED: Main document click listener has been attached.');
     closeModalBtn.addEventListener('click', () => { // Listener for modal close button
         pokemonSelectionModal.style.display = 'none';
     });

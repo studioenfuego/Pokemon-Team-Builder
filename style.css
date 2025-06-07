@@ -1,27 +1,32 @@
-/* Basic Reset & Modern Defaults */
-:root {
-    --danger-color: #e74c3c; /* A slightly softer red */
-    --danger-hover-color: #c0392b; /* Darker shade for hover */
-    --primary-color: #4A90E2; /* Modern Blue */
-    --secondary-color: #48C9B0; /* Modern Teal */
-    --background-color: #F8F9FA; /* Clean Light Gray */
-    --text-color: #343A40; /* Dark Readable Gray */
-    --header-bg: #2C3E50; /* Kept Dark Blue/Gray */
-    --header-text: #ecf0f1; /* Kept Light Gray/White */
-    --grid-border: #DEE2E6; /* Subtle Light Gray Border */
-    --cell-bg: #fff; /* Kept White */
-    --cell-hover-bg: #EBF5FB; /* Refined Light Blue Hover */
-    --button-bg: var(--primary-color);
-    --button-text: #fff;
-    --button-hover-bg: #357ABD; /* Darker shade of primary */
-    --input-border: #CED4DA; /* Common Input Border */
-    --modal-bg: rgba(0, 0, 0, 0.6); /* Kept */
-    --modal-content-bg: #fff; /* Kept */
-    --primary-color-rgb: 74, 144, 226; /* RGB for #4A90E2 */
+/* Neobrutalist Styles */
 
-    font-family: 'Inter', sans-serif;
-    font-size: 16px;
-    line-height: 1.6;
+:root {
+    /* Neobrutalist Color Palette */
+    --neo-blue: #00FFFF; /* Cyan */
+    --neo-pink: #FF00FF; /* Magenta */
+    --neo-green: #39FF14; /* Neon Green */
+    --neo-yellow: #FFFF00; /* Yellow */
+    
+    --neutral-bg-light: #F0F0E0; /* Light Beige/Off-white */
+    --neutral-bg-soft-gray: #DCDCDC; /* Soft Gray */
+    
+    --border-color-dark: #000000;
+    --border-color-gray: #333333;
+    
+    --text-color-dark: #1A1A1A;
+    --text-color-light: #FFFFFF;
+    
+    /* UI Properties */
+    --border-thickness: 3px;
+    --border-radius-minimal: 4px;
+    --padding-chunky: 1.5rem;
+    --margin-chunky: 1.5rem;
+
+    /* Fonts */
+    --font-primary: 'Space Grotesk', 'Inter', sans-serif;
+    --font-secondary: 'Inter', sans-serif;
+    --font-weight-bold: 700;
+    --font-weight-black: 900;
 }
 
 * {
@@ -31,419 +36,512 @@
 }
 
 body {
-    background-color: var(--background-color);
-    color: var(--text-color);
+    background-color: var(--neutral-bg-light);
+    /* Optional: Graph paper background */
+    background-image: 
+        linear-gradient(var(--neutral-bg-soft-gray) 1px, transparent 1px),
+        linear-gradient(to right, var(--neutral-bg-soft-gray) 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: var(--text-color-dark);
+    font-family: var(--font-secondary);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.6;
     display: flex;
     justify-content: center;
-    padding-top: 20px;
+    padding-top: var(--margin-chunky);
     min-height: 100vh;
 }
 
 .container {
-    width: 95%;
-    max-width: 1400px; /* Increased max-width for wider grids */
-    background-color: #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Softer shadow */
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 20px;
+    width: 90%;
+    max-width: 1300px;
+    background-color: var(--neutral-bg-light);
+    border: var(--border-thickness) solid var(--border-color-dark);
+    box-shadow: 8px 8px 0px var(--border-color-dark); /* Drop shadow effect */
+    border-radius: 0; /* No rounded corners */
+    overflow: hidden; /* Revert to original state to clip content */
+    margin-bottom: var(--margin-chunky);
 }
 
 header {
-    background-color: var(--header-bg);
-    color: var(--header-text);
-    padding: 1.25rem 1.5rem;
+    background-color: var(--neo-yellow);
+    color: var(--text-color-dark);
+    padding: var(--padding-chunky);
     text-align: center;
+    border-bottom: var(--border-thickness) solid var(--border-color-dark);
 }
 
 header h1 {
     margin: 0;
-    font-size: 1.8rem;
+    font-family: var(--font-primary);
+    font-size: 3.5rem; /* Huge and commanding */
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    /* Optional: Layered text effect */
+    /* text-shadow: 2px 2px 0px var(--border-color-dark), -2px -2px 0px var(--neo-pink); */
 }
 
 main {
-    padding: 1.5rem;
+    padding: var(--padding-chunky);
 }
 
 .controls {
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--margin-chunky);
     display: flex;
-    gap: 10px;
-    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 1rem;
+    align-items: stretch; /* Make items same height */
 }
 
 .controls input[type="text"] {
     flex-grow: 1;
-    padding: 0.65rem;
-    border: 1px solid var(--input-border);
-    border-radius: 6px; /* Updated */
-    font-size: 0.95rem;
-    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out; /* Added */
+    padding: 0.75rem 1rem;
+    border: var(--border-thickness) solid var(--border-color-dark);
+    border-radius: var(--border-radius-minimal);
+    font-family: var(--font-secondary);
+    font-size: 1rem;
+    background-color: var(--text-color-light);
+    color: var(--text-color-dark);
+    box-shadow: 4px 4px 0px var(--border-color-dark);
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
 }
 
 .controls input[type="text"]:focus {
-    border-color: var(--primary-color);
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25); /* Added modern focus */
+    outline: none;
+    border-color: var(--neo-blue);
+    box-shadow: 4px 4px 0px var(--neo-blue);
+    transform: translate(-2px, -2px);
 }
 
 .controls button {
-    padding: 0.65rem 1.25rem;
-    background-color: var(--button-bg);
-    color: var(--button-text);
-    border: none;
-    border-radius: 6px; /* Updated */
+    padding: 0.75rem 1.5rem;
+    background-color: var(--neo-pink);
+    color: var(--text-color-light);
+    border: var(--border-thickness) solid var(--border-color-dark);
+    border-radius: var(--border-radius-minimal);
     cursor: pointer;
-    font-size: 0.95rem;
-    transition: background-color 0.3s ease;
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0px var(--border-color-dark);
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, background-color 0.2s;
 }
 
 .controls button:hover {
-    background-color: var(--button-hover-bg);
+    background-color: var(--neo-green);
+    color: var(--text-color-dark);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--border-color-dark);
+}
+
+.controls button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--border-color-dark);
 }
 
 #pokemon-grid-container {
-    display: grid;
-    border: 1px solid var(--grid-border);
-    border-radius: 4px;
-    overflow-x: auto; /* For many types */
-    background-color: #fff; /* Ensure background for sticky headers */
+    display: grid; /* Essential for laying out pokemon-cells-row elements */
+    /* border, padding, gap, overflow-x, and background-color removed to inherit from scrollable-types-area 
+       and prevent misalignments with type-headers-container. 
+       Individual cells (.grid-pokemon-cell) provide their own borders. */
+    border-radius: 0; /* Retained, though less impactful without a direct border */
 }
 
 .grid-header-cell, .grid-name-cell, .grid-pokemon-cell {
-    padding: 0.85rem 0.75rem; /* Adjusted padding */
+    padding: 1rem 0.75rem;
     text-align: center;
-    border-right: 1px solid var(--grid-border);
-    border-bottom: 1px solid var(--grid-border);
-    min-width: 120px; /* Ensure cells have some width */
+    background-color: var(--neutral-bg-light);
+    border: var(--border-thickness) solid var(--border-color-dark);
+    min-width: 100px; 
+    min-height: 6rem; /* Ensure consistent cell height */
     font-size: 0.9rem;
     line-height: 1.3;
+    box-shadow: 3px 3px 0px var(--border-color-gray);
+    border-radius: 0; /* Ensure cells are boxy */
 }
-
-/* Specific padding for pokemon cells if needed, or keep general */
-.grid-pokemon-cell {
-    padding: 0.75rem; /* Revert to original for image centering if 0.85 is too much */
-}
-/* Remove border from the very last cell in the grid */
-/* #pokemon-grid-container > div:last-child { */
-    /* border-right: none;  This is tricky with dynamic rows, better to handle by column */
-/* } */
-/* Ensure last column cells don't have right border */
-/* This will be handled by JS adding specific classes or nth-child if structure is fixed */
 
 .grid-header-cell {
-    background-color: var(--primary-color);
-    color: white;
-    font-weight: 600; /* Inter semi-bold */
+    background-color: var(--neo-blue);
+    color: var(--text-color-dark);
+    font-family: var(--font-primary);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
     position: sticky;
     top: 0;
-    z-index: 10; /* Above name cells if they scroll under */
+    z-index: 10;
 }
-.grid-name-header { /* Special for the top-left cell */
+
+.grid-name-header { /* Top-left cell */
     left: 0;
-    z-index: 15 !important; /* Above other headers and name cells */
+    z-index: 15 !important;
+    background-color: var(--neo-yellow); /* Make it stand out */
 }
+
 .grid-name-cell {
-    background-color: #F1F3F5; /* Theme-aligned light gray for name column */
-    font-weight: 500; /* Inter medium */
+    background-color: var(--neutral-bg-soft-gray);
+    font-weight: var(--font-weight-bold);
     position: sticky;
     left: 0;
     z-index: 5;
-    display: flex; /* To align name and button */
-    align-items: center;
-    justify-content: space-between; /* Pushes button to the right */
-    padding-right: 10px; /* Add some padding for the button */
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: center;    /* Center items horizontally */
+    justify-content: center;  /* Center items vertically */
+    padding-right: 10px;
+    color: var(--text-color-dark);
 }
 
-.grid-name-cell span { /* Target the span holding the name */
-    flex-grow: 1; /* Allow name to take available space */
+.grid-name-cell span {
+    flex-grow: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-family: var(--font-secondary);
+    font-weight: var(--font-weight-bold);
 }
 
 .delete-trainer-btn {
-    background-color: transparent;
-    border: none;
-    color: var(--danger-color, #dc3545); /* Use a danger color, fallback red */
-    font-size: 1.2rem; /* Make the 'X' a bit larger */
-    font-weight: bold;
+    background-color: var(--neo-pink);
+    border: var(--border-thickness) solid var(--border-color-dark);
+    color: var(--text-color-light);
+    font-size: 1rem;
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
-    padding: 0 5px; /* Minimal padding */
-    line-height: 1; /* Ensure 'X' is vertically centered if it's text */
-    margin-left: 8px;
-    transition: color 0.2s ease;
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+    margin-top: 0.5rem; /* Space below trainer name */
+    border-radius: var(--border-radius-minimal);
+    box-shadow: 2px 2px 0px var(--border-color-dark);
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, background-color 0.2s;
 }
 
 .delete-trainer-btn:hover {
-    color: var(--danger-hover-color, #c82333); /* Darker red on hover */
+    background-color: var(--neo-red, #FF4136); /* Adding a Neobrutalist red */
+    color: var(--text-color-light);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px var(--border-color-dark);
 }
 
 .grid-pokemon-cell {
-    background-color: var(--cell-bg);
-    border: 1px solid var(--grid-border);
-    min-height: 100px; /* Ensure cells have a minimum height */
+    background-color: var(--text-color-light);
+    min-height: 120px;
     display: flex;
-    flex-direction: column; /* Stack image and name vertically */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background-color 0.2s ease;
     position: relative; 
-    padding: 5px;
-    overflow: hidden; /* Prevent content from spilling */
+    padding: 10px;
+    overflow: hidden;
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, background-color 0.2s;
 }
 
 .grid-pokemon-cell:hover {
-    background-color: var(--cell-hover-bg);
+    background-color: var(--neo-yellow);
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--border-color-dark);
 }
 
 .pokemon-image-in-cell {
-    max-width: 80%; 
-    max-height: 55px; 
-    object-fit: contain;
-    display: block; 
+    max-width: 80px;
+    max-height: 80px;
+    margin-bottom: 5px;
+    image-rendering: pixelated; /* For a retro/raw feel */
 }
 
 .pokemon-name-in-cell {
-    font-size: 0.7rem; 
-    color: var(--text-color);
+    font-size: 0.8rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-color-dark);
     text-align: center;
-    margin-top: 4px;
-    line-height: 1.2;
-    overflow-wrap: break-word; 
-    max-width: 100%; 
 }
 
 /* Modal Styles */
 .modal {
+    display: none; /* Hidden by default */
     position: fixed;
-    z-index: 1000; /* High z-index */
+    z-index: 100;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: var(--modal-bg);
-    display: flex; 
-    align-items: center;
-    justify-content: center;
+    background-color: rgba(0,0,0,0.6); /* Semi-transparent black overlay */
+    padding-top: 60px; /* Space from top */
 }
 
 .modal-content {
-    background-color: var(--modal-content-bg);
-    margin: auto;
-    padding: 25px;
-    border: 1px solid var(--grid-border);
-    width: 90%;
-    max-width: 700px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    background-color: var(--neutral-bg-light);
+    margin: 5% auto;
+    padding: 1.5rem; /* Adjusted padding */
+    border: var(--border-thickness) solid var(--border-color-dark);
+    width: 80%;
+    max-width: 700px; /* Max width remains */
+    min-height: 70vh; /* Ensure modal is tall enough */
+    max-height: 85vh; /* Prevent modal from being too tall */
+    border-radius: 0; /* Boxy */
+    box-shadow: 10px 10px 0px var(--border-color-dark);
     position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent content from spilling before list scrolls */
 }
 
 .close-btn {
-    color: #6c757d; /* More readable gray */
-    position: absolute; /* Position relative to modal-content */
-    top: 10px;
-    right: 15px;
-    font-size: 28px;
-    font-weight: bold;
+    color: var(--text-color-light);
+    background-color: var(--neo-pink);
+    border: var(--border-thickness) solid var(--border-color-dark);
+    position: absolute;
+    top: -10px; /* Overlap border slightly */
+    right: -10px; /* Overlap border slightly */
+    font-size: 1.5rem;
+    font-weight: var(--font-weight-bold);
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    border-radius: 0;
+    box-shadow: 3px 3px 0px var(--border-color-dark);
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, background-color 0.2s;
 }
 
 .close-btn:hover,
 .close-btn:focus {
-    color: var(--text-color); /* Theme-consistent hover color */
+    background-color: var(--neo-red, #FF4136);
+    color: var(--text-color-light);
     text-decoration: none;
-    cursor: pointer;
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--border-color-dark);
 }
 
-#modal-title {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.5rem;
-    font-weight: 600; /* Inter semi-bold */
-    color: var(--text-color);
+.modal-content h2 {
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-color-dark);
+    margin-bottom: 1rem;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 #modal-pokemon-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 15px;
-    max-height: 60vh; /* Viewport height based */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    /* max-height: 400px; Removed to allow growth */
     overflow-y: auto;
-    padding-top: 5px; /* Space from title */
+    border: var(--border-thickness) solid var(--border-color-gray);
+    padding: 1rem;
+    background-color: var(--neutral-bg-soft-gray);
+    flex-grow: 1; /* Allow this list to take available space */
+    min-height: 0; /* Important for flex-grow in a scrollable container */
 }
 
-#modal-pokemon-list .pokemon-preview {
-    border: 1px solid var(--grid-border);
-    border-radius: 6px; /* Updated */
-    padding: 10px;
-    text-align: center;
+.pokemon-preview {
+    background-color: var(--text-color-light);
+    border: var(--border-thickness) solid var(--border-color-dark);
+    padding: 1rem;
+    /* text-align: center; */ /* Flex alignment handles horizontal centering */
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    width: 120px; /* Ensures cards have a consistent width */
+    box-shadow: 3px 3px 0px var(--border-color-gray);
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, background-color 0.2s;
+    
+    /* Added for vertical stacking and centering */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers items horizontally */
+    justify-content: flex-start; /* Aligns items to the top */
 }
 
-#modal-pokemon-list .pokemon-preview:hover {
-    background-color: var(--cell-hover-bg);
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Added pop effect */
+.pokemon-preview:hover {
+    background-color: var(--neo-yellow);
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--border-color-dark);
 }
 
-#modal-pokemon-list img {
-    max-width: 80px;
-    max-height: 80px;
-    display: block;
-    margin: 0 auto 5px;
+.pokemon-preview img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0.5rem;
+    image-rendering: pixelated;
 }
 
-#modal-pokemon-list span {
-    font-size: 0.85rem;
-    display: block; /* Ensure it takes its own line */
+.pokemon-preview span {
+    font-family: var(--font-secondary);
+    font-weight: var(--font-weight-bold);
+    font-size: 0.9rem;
+    color: var(--text-color-dark);
+    margin-top: 0.5rem; /* Adjusted for better spacing below image */
+    display: block; /* Ensure it takes up its own line in the flex column */
+    width: 100%; /* Occupy full width of the parent card */
+    text-align: center; /* Center the text content */
 }
 
-/* Team Summary Modal Specifics */
 #summary-content {
-    max-height: 70vh; /* Similar to pokemon selection modal list */
+    border: var(--border-thickness) solid var(--border-color-gray);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--neutral-bg-soft-gray);
+    max-height: 300px;
     overflow-y: auto;
-    padding-top: 10px;
 }
 
-.summary-trainer-block {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--grid-border);
-}
-
-.summary-trainer-block:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.summary-trainer-block h3 {
+#summary-content h3 {
+    font-family: var(--font-primary);
     font-size: 1.2rem;
-    color: var(--primary-color);
-    margin-bottom: 10px;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color-dark);
+    border-bottom: var(--border-thickness) solid var(--border-color-dark);
+    padding-bottom: 0.25rem;
+}
+
+#summary-content p {
+    margin-bottom: 0.5rem;
+    font-family: var(--font-secondary);
 }
 
 .summary-pokemon-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Adjust as needed */
-    gap: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem; /* Spacing between Pokémon entries */
+    justify-content: flex-start; /* Align entries to the start */
+    margin-top: 0.5rem;
 }
 
 .summary-pokemon-entry {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: var(--background-color);
-    padding: 8px;
-    border-radius: 4px;
-    font-size: 0.9rem;
+    flex-direction: column;
+    align-items: center; /* Center image and name horizontally */
+    width: 70px; /* Adjust width as needed for compactness */
+    text-align: center;
 }
 
 .summary-pokemon-entry img {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
+    width: 50px; /* Smaller icon for summary */
+    height: 50px;
+    margin-bottom: 0.25rem;
+    image-rendering: pixelated;
+}
+
+.summary-pokemon-entry span {
+    font-size: 0.8rem; /* Smaller font for name */
+    color: var(--text-color-dark);
+    word-break: break-word; /* Prevent long names from breaking layout */
 }
 
 .modal-action-btn {
-    display: block; /* Or inline-block if preferred */
-    margin: 20px auto 0;
+    display: block;
+    width: calc(100% - var(--border-thickness) * 2); /* Account for border */
+    margin: 1rem auto 0;
     padding: 0.75rem 1.5rem;
-    background-color: var(--secondary-color);
-    color: var(--button-text);
-    border: none;
-    border-radius: 6px;
+    background-color: var(--neo-green);
+    color: var(--text-color-dark);
+    border: var(--border-thickness) solid var(--border-color-dark);
+    border-radius: var(--border-radius-minimal);
     cursor: pointer;
-    font-size: 0.95rem;
-    transition: background-color 0.3s ease;
+    font-family: var(--font-primary);
+    font-size: 1.1rem;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    text-align: center;
+    box-shadow: 4px 4px 0px var(--border-color-dark);
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, background-color 0.2s;
 }
 
 .modal-action-btn:hover {
-    background-color: #3AA590; /* Darker shade of secondary */
+    background-color: var(--neo-blue);
+    color: var(--text-color-dark);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--border-color-dark);
 }
 
-/* --- Responsive Design --- */
-@media (max-width: 768px) {
-    main {
-        padding: 1rem;
-    }
+/* New Grid System Styles */
+#grid-system-wrapper {
+    margin-bottom: var(--margin-chunky);
+}
 
+#grid-scroll-controls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+}
+
+#grid-scroll-controls button {
+    padding: 0.5rem 1rem;
+    background-color: var(--neo-blue);
+    color: var(--text-color-dark);
+    border: var(--border-thickness) solid var(--border-color-dark);
+    border-radius: var(--border-radius-minimal);
+    font-family: var(--font-primary);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+    box-shadow: 3px 3px 0px var(--border-color-dark);
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+}
+
+#grid-scroll-controls button:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px var(--border-color-dark);
+}
+
+#grid-scroll-controls button:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0px var(--border-color-dark);
+}
+
+#grid-layout-wrapper {
+    display: flex;
+    border: var(--border-thickness) solid var(--border-color-dark); /* Border around the whole new grid area */
+}
+
+#fixed-trainer-column {
+    min-width: 150px; /* Increased for longer trainer names */
+    max-width: 200px; /* Increased for longer trainer names */
+    flex-shrink: 0; /* Prevent shrinking */
+    background-color: var(--neutral-bg-light); /* To distinguish it */
+    border-right: var(--border-thickness) solid var(--border-color-dark);
+    /* Sticky positioning for the trainer names might be complex with this new structure, hold off for now */
+}
+
+#fixed-trainer-column .grid-name-header {
+    position: sticky; /* Make trainer header sticky within its column */
+    top: 0;
+    z-index: 16; /* Above type headers if they also become sticky */
+}
+
+#scrollable-types-area {
+    flex-grow: 1;
+    overflow-x: hidden; /* IMPORTANT: JS will handle scrolling */
+    background-color: var(--neutral-bg-soft-gray); /* To distinguish it */
+}
+
+#type-headers-container {
+    display: grid; /* Will use grid to align with pokemon-grid-container columns */
+    position: sticky;
+    top: 0;
+    z-index: 10; /* Below trainer name header if it's also sticky */
+    background-color: var(--neutral-bg-soft-gray); /* Match scrollable area */
+}
+
+/* Ensure .grid-header-cell and .grid-name-header styles apply correctly */
+/* .grid-header-cell is already defined, .grid-name-header too */
+/* .type-header-cell might need specific padding if different from .grid-header-cell */
+
+
+/* Responsive Adjustments (Optional - can be expanded) */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2.5rem;
+    }
     .controls {
         flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
     }
-
-    .controls input[type="text"] {
-        margin-bottom: 0; /* Reset if any, rely on gap */
-    }
-
-    .grid-header-cell, .grid-name-cell, .grid-pokemon-cell {
-        min-width: 60px; /* Reduced min-width */
-        min-height: 80px; /* Adjusted min-height to accommodate name */
-        padding: 3px;
-    }
-
-    .pokemon-image-in-cell {
-        max-height: 35px; /* Smaller images on mobile */
-    }
-
-    .pokemon-name-in-cell {
-        font-size: 0.65rem;
-        margin-top: 2px;
-    }
-
     .modal-content {
-        padding: 20px;
-        width: 95%; /* Allow modal to use more screen width */
-    }
-
-    #modal-title {
-        font-size: 1.3rem;
-    }
-
-    #modal-pokemon-list {
-        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
-        gap: 10px;
-    }
-
-    #modal-pokemon-list img {
-        max-width: 60px;
-        max-height: 60px;
-    }
-
-    #modal-pokemon-list span {
-        font-size: 0.8rem;
-    }
-
-    /* Summary Modal Responsive Adjustments */
-    .summary-pokemon-list {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
-
-    .summary-trainer-block h3 {
-        font-size: 1.1rem;
-    }
-
-    .summary-pokemon-entry {
-        font-size: 0.85rem;
-    }
-
-    .summary-pokemon-entry img {
-        width: 30px;
-        height: 30px;
-    }
-
-    .modal-action-btn {
-        padding: 0.65rem 1.25rem;
-        font-size: 0.9rem;
-    }
-
-    header h1 {
-        font-size: 1.5rem;
+        width: 90%;
+        margin: 10% auto;
     }
 }
