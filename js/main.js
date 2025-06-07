@@ -117,12 +117,18 @@ document.addEventListener('DOMContentLoaded', () => {
             typeHeadersContainer.appendChild(headerCell);
         });
 
+        // Add Favorite Header
+        const favoriteHeaderCell = document.createElement('div');
+        favoriteHeaderCell.classList.add('grid-header-cell', 'favorite-header-cell');
+        favoriteHeaderCell.textContent = 'Favorite';
+        typeHeadersContainer.appendChild(favoriteHeaderCell);
+
         // Configure gridContainer (now for Pokémon cells only) and typeHeadersContainer
         // They will have one column per Pokémon type.
-        const pokemonCellGridLayout = POKEMON_TYPES.map(() => `minmax(120px, 1fr)`).join(' ');
+        const allHeadersLayout = [...POKEMON_TYPES, 'Favorite'].map(() => `minmax(120px, 1fr)`).join(' ');
         // gridContainer itself should stack rows vertically. Its grid-template-columns are not for individual type cells.
         // Each pokemon-cells-row will use pokemonCellGridLayout for its own columns.
-        typeHeadersContainer.style.gridTemplateColumns = pokemonCellGridLayout; // Ensure alignment
+        typeHeadersContainer.style.gridTemplateColumns = allHeadersLayout; // Ensure alignment
         // gridContainer's display:grid is already set via CSS, so that should be fine.
 
         // Helper function to update scroll button states
@@ -194,8 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
         pokemonCellsRow.dataset.trainerName = trainerName; // For easier identification / deletion
         pokemonCellsRow.style.display = 'grid';
         // Ensure this layout matches typeHeadersContainer and gridContainer's overall column defs for types
-        const typesColumnLayout = POKEMON_TYPES.map(() => `minmax(120px, 1fr)`).join(' '); 
-        pokemonCellsRow.style.gridTemplateColumns = typesColumnLayout;
+        const allCellsLayout = [...POKEMON_TYPES, 'Favorite'].map(() => `minmax(120px, 1fr)`).join(' '); 
+        pokemonCellsRow.style.gridTemplateColumns = allCellsLayout;
         
         // Create a Pokémon cell for each type in this trainer's row
         POKEMON_TYPES.forEach(type => {
@@ -207,6 +213,15 @@ document.addEventListener('DOMContentLoaded', () => {
             trainerRowCells[trainerName][type] = typeCell;
             pokemonCellsRow.appendChild(typeCell);
         });
+
+        // Add Favorite Cell
+        const favoriteCell = document.createElement('div');
+        favoriteCell.classList.add('grid-pokemon-cell', 'grid-favorite-cell'); // Add class for potential styling
+        favoriteCell.dataset.trainer = trainerName;
+        favoriteCell.dataset.type = 'favorite'; // Special identifier for this cell's purpose
+        favoriteCell.innerHTML = '<span>-</span>'; // Placeholder, to be replaced by selection logic
+        trainerRowCells[trainerName]['favorite'] = favoriteCell; // Store reference
+        pokemonCellsRow.appendChild(favoriteCell);
 
         gridContainer.appendChild(pokemonCellsRow); // Add the row of Pokémon cells to the main scrollable grid
         syncAllRowHeights(); // Add the row of Pokémon cells to the main scrollable grid
@@ -251,67 +266,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // const POKEMON_DATA = { ... }; // Removed as it's now imported from js/constants.js
     
-    function populateModal(pokemonArray, trainerName, pokemonType) {
-        modalPokemonList.innerHTML = ''; // Clear previous Pokémon previews
 
-        if (pokemonArray.length === 0) {
-            const noPokemonMessage = document.createElement('p');
+function populateModal(pokemonArray, trainerName, pokemonType) {
+    modalPokemonList.innerHTML = ''; // Clear previous Pokémon previews
+
+    if (pokemonArray.length === 0) {
+        const noPokemonMessage = document.createElement('p');
+        if (pokemonType === 'favorite') {
+            noPokemonMessage.textContent = `${trainerName} has not selected any Pokémon yet to choose a favorite from.`;
+        } else {
             noPokemonMessage.textContent = `No Pokémon of type "${pokemonType}" found in Gen 9 data.`;
-            modalPokemonList.appendChild(noPokemonMessage);
-            return;
         }
-
-        pokemonArray.forEach(pokemon => {
-            const previewDiv = document.createElement('div');
-            previewDiv.classList.add('pokemon-preview');
-            previewDiv.dataset.pokemonId = pokemon.id; // e.g., "SPRIGATITO"
-
-            const img = document.createElement('img');
-            img.src = pokemon.image_path;
-            img.alt = pokemon.name;
-            // Add error handling for images, though not strictly required by plan
-            img.onerror = () => { 
-                img.alt = `Image not found for ${pokemon.name}`;
-                // Optionally, replace src with a placeholder image or style the broken image
-            };
-
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = pokemon.name;
-
-            previewDiv.appendChild(img);
-            previewDiv.appendChild(nameSpan);
-            modalPokemonList.appendChild(previewDiv);
-        });
+        modalPokemonList.appendChild(noPokemonMessage);
+        return;
     }
 
-    // --- Phase 3.2.3: Function to open modal on grid cell click ---
-    function handleGridCellClick(event) {
-        const clickedCell = event.target.closest('.grid-pokemon-cell');
-        if (!clickedCell) {
-            return; // Click was not on a Pokémon cell or its child
+    pokemonArray.forEach(pokemon => {
+        const previewDiv = document.createElement('div');
+        previewDiv.classList.add('pokemon-preview');
+        previewDiv.dataset.pokemonId = pokemon.id; // e.g., "SPRIGATITO"
+
+        const img = document.createElement('img');
+        img.src = pokemon.image_path;
+        img.alt = pokemon.name;
+        // Add error handling for images, though not strictly required by plan
+        img.onerror = () => { 
+            img.alt = `Image not found for ${pokemon.name}`;
+            // Optionally, replace src with a placeholder image or style the broken image
+        };
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = pokemon.name;
+
+        previewDiv.appendChild(img);
+        previewDiv.appendChild(nameSpan);
+        modalPokemonList.appendChild(previewDiv);
+    });
+}
+
+// --- Phase 3.2.3: Function to open modal on grid cell click ---
+function handleGridCellClick(event) {
+    const clickedCell = event.target.closest('.grid-pokemon-cell');
+    if (!clickedCell) {
+        return; // Click was not on a Pokémon cell or its child
+    }
+
+    const trainerName = clickedCell.dataset.trainer;
+    const pokemonType = clickedCell.dataset.type;
+
+    if (!trainerName || !pokemonType) {
+        console.error("Clicked cell is missing trainer or type data attributes.", clickedCell);
+        return;
+    }
+    
+    // Store current cell context on the modal itself for later use when a Pokémon is selected (Phase 4)
+    pokemonSelectionModal.dataset.currentTargetCellTrainer = trainerName;
+    pokemonSelectionModal.dataset.currentTargetCellType = pokemonType;
+
+    if (pokemonType === 'favorite') {
+        modalTitle.textContent = `Select Favorite Pokémon for ${trainerName}`;
+        const selectedPokemonForTrainer = [];
+        if (teamData[trainerName]) {
+            POKEMON_TYPES.forEach(type => {
+                if (teamData[trainerName][type] && teamData[trainerName][type].id) {
+                    selectedPokemonForTrainer.push(teamData[trainerName][type]);
+                }
+            });
         }
-
-        const trainerName = clickedCell.dataset.trainer;
-        const pokemonType = clickedCell.dataset.type;
-
-        if (!trainerName || !pokemonType) {
-            console.error("Clicked cell is missing trainer or type data attributes.", clickedCell);
-            return;
-        }
-        
-        // Store current cell context on the modal itself for later use when a Pokémon is selected (Phase 4)
-        pokemonSelectionModal.dataset.currentTargetCellTrainer = trainerName;
-        pokemonSelectionModal.dataset.currentTargetCellType = pokemonType;
-
+        populateModal(selectedPokemonForTrainer, trainerName, 'favorite');
+    } else {
         modalTitle.textContent = `Select ${pokemonType} Pokémon for ${trainerName}`;
-        
         const pokemonOfType = getPokemonOfType(pokemonType);
-        populateModal(pokemonOfType, trainerName, pokemonType); // Call to (currently placeholder) populate function
-
-        pokemonSelectionModal.style.display = 'flex'; // Show the modal
+        populateModal(pokemonOfType, trainerName, pokemonType);
     }
 
-    // --- Phase 4: Implementing Pokémon Selection ---
+    pokemonSelectionModal.style.display = 'flex'; // Show the modal
+}
+
     // --- Phase 4.1.1 & 4.1.2 (Initial): Handle Pokémon selection in modal ---
     function handleModalPokemonSelect(event) {
         const clickedPreview = event.target.closest('.pokemon-preview');
@@ -336,7 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 4.1.2.2. Update the corresponding cell in the main grid
-        const targetCell = trainerRowCells[trainerName][pokemonType];
+        let targetCell;
+        if (pokemonType === 'favorite') {
+            targetCell = trainerRowCells[trainerName]['favorite'];
+        } else {
+            targetCell = trainerRowCells[trainerName][pokemonType];
+        }
 
         // Construct the object for display, ensuring it has an 'id' property
         const pokemonToDisplay = {
@@ -350,11 +386,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!teamData[trainerName]) {
             teamData[trainerName] = {}; // Should already exist from handleAddPerson, but good practice
         }
-        teamData[trainerName][pokemonType] = {
-            id: pokemonId,
-            name: selectedPokemonData.name,
-            image_path: selectedPokemonData.image_path
-        };
+        if (pokemonType === 'favorite') {
+            teamData[trainerName].favorite = {
+                id: pokemonId,
+                name: selectedPokemonData.name,
+                image_path: selectedPokemonData.image_path
+            };
+        } else {
+            teamData[trainerName][pokemonType] = {
+                id: pokemonId,
+                name: selectedPokemonData.name,
+                image_path: selectedPokemonData.image_path
+            };
+        }
+
         console.log("Updated Team Data:", teamData);
         saveTeamDataToLocalStorage(); // Save after Pokémon selection
 
@@ -390,44 +435,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Phase 6.1.2: Load team compositions from localStorage ---
-    function loadTeamDataFromLocalStorage() {
-        const savedDataString = localStorage.getItem('pokemonTeamBuilderData');
-        if (!savedDataString) {
-            console.log('No saved team data found in localStorage.');
-            return;
-        }
-
-        try {
-            const savedData = JSON.parse(savedDataString);
-            if (savedData && savedData.trainersOrder && savedData.selections) {
-                updateTeamData(savedData.selections); // Restore teamData object
-
-                // Rebuild the grid rows based on the saved order and data
-                savedData.trainersOrder.forEach(trainerName => {
-                    createAndDisplayTrainerRow(trainerName); // Create the UI row
-
-                    // Populate Pokémon in the row if selections exist
-                    if (teamData[trainerName]) {
-                        POKEMON_TYPES.forEach(type => {
-                            const selectedPokemonInfo = teamData[trainerName][type];
-                            if (selectedPokemonInfo && selectedPokemonInfo.id) {
-                                const targetCell = trainerRowCells[trainerName][type];
-                                updateGridCellDisplay(targetCell, selectedPokemonInfo);
-                                }
-                        });
-                    }
-                });
-                console.log('Team data loaded from localStorage.');
-            } else {
-                console.warn('Saved data in localStorage is not in the expected format.');
-            }
-        } catch (e) {
-            console.error('Failed to load or parse team data from localStorage:', e);
-        }
-
-
+// --- Phase 6.1.2: Load team compositions from localStorage ---
+function loadTeamDataFromLocalStorage() {
+    const savedDataString = localStorage.getItem('pokemonTeamBuilderData');
+    if (!savedDataString) {
+        console.log('No saved team data found in localStorage.');
+        return;
     }
+
+    try {
+        const savedData = JSON.parse(savedDataString);
+        if (savedData && savedData.trainersOrder && savedData.selections) {
+            updateTeamData(savedData.selections); // Restore teamData object
+
+            // Rebuild the grid rows based on the saved order and data
+            savedData.trainersOrder.forEach(trainerName => {
+                createAndDisplayTrainerRow(trainerName); // Create the UI row
+
+                // Populate Pokémon in the row if selections exist
+                if (teamData[trainerName]) {
+                    POKEMON_TYPES.forEach(type => {
+                        const selectedPokemonInfo = teamData[trainerName][type];
+                        if (selectedPokemonInfo && selectedPokemonInfo.id) {
+                            const targetCell = trainerRowCells[trainerName][type];
+                            updateGridCellDisplay(targetCell, selectedPokemonInfo);
+                            }
+                    });
+                }
+                // Load and display favorite Pokémon
+                const favoritePokemonInfo = teamData[trainerName].favorite;
+                if (favoritePokemonInfo && favoritePokemonInfo.id) {
+                    const favoriteCell = trainerRowCells[trainerName]['favorite'];
+                    if (favoriteCell) { // Ensure the cell exists in case of any inconsistencies
+                        updateGridCellDisplay(favoriteCell, favoritePokemonInfo);
+                    }
+                }
+            });
+            console.log('Team data loaded from localStorage.');
+        } else {
+            console.warn('Saved data in localStorage is not in the expected format.');
+        }
+    } catch (e) {
+        console.error('Failed to load or parse team data from localStorage:', e);
+    }
+}
 
 function syncAllRowHeights() {
     // Sync data rows
@@ -562,6 +613,31 @@ syncAllRowHeights();
                 }
             });
 
+            // Display Favorite Pokémon
+            const favoriteSelection = teamData[trainerName]?.favorite;
+            if (favoriteSelection && favoriteSelection.id) {
+                hasSelections = true; // A favorite counts as a selection
+                const favoriteEntry = document.createElement('div');
+                favoriteEntry.classList.add('summary-pokemon-entry', 'summary-favorite-entry'); // Added 'summary-favorite-entry' for potential styling
+
+                const favoriteLabel = document.createElement('strong');
+                favoriteLabel.textContent = 'Favorite: ';
+                favoriteEntry.appendChild(favoriteLabel);
+
+                const img = document.createElement('img');
+                img.src = favoriteSelection.image_path;
+                img.alt = favoriteSelection.name;
+                img.onerror = () => img.alt = 'Img not found';
+                favoriteEntry.appendChild(img);
+
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = favoriteSelection.name;
+                favoriteEntry.appendChild(nameSpan);
+                
+                // Prepend favorite to the list or append, depending on desired order. Let's prepend.
+                pokemonListDiv.prepend(favoriteEntry); 
+            }
+
             if (!hasSelections) {
                 const noSelectionText = document.createElement('p');
                 noSelectionText.textContent = 'No Pokémon selected for this trainer.';
@@ -600,6 +676,14 @@ syncAllRowHeights();
                     selectionsMade = true;
                 }
             });
+
+            // Add Favorite Pokémon to text summary
+            const favoriteSelection = teamData[trainerName]?.favorite;
+            if (favoriteSelection && favoriteSelection.id) {
+                textSummary += `  Favorite: ${favoriteSelection.name}\n`;
+                selectionsMade = true; // A favorite counts as a selection
+            }
+
             if (!selectionsMade) {
                 textSummary += `  (No Pokémon selected)\n`;
             }

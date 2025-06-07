@@ -179,6 +179,31 @@ main {
     background-color: var(--neo-yellow); /* Make it stand out */
 }
 
+/* Favorite Column Header */
+.favorite-header-cell {
+    background-color: #FFD700; /* Gold-ish color for favorites */
+    color: #333;
+    font-weight: bold;
+}
+
+/* Favorite Pokémon Cell in Grid */
+.grid-favorite-cell {
+    border-left: 2px solid #FFD700; /* Emphasize its separation */
+    /* Potentially a slightly different background if empty or placeholder */
+}
+
+/* Favorite Entry in Summary Modal */
+.summary-favorite-entry {
+    border: 1px solid #FFD700;
+    padding: 5px;
+    margin-top: 5px;
+    background-color: #fffacd; /* Light yellow */
+}
+
+.summary-favorite-entry strong {
+    color: #DAA520; /* Darker gold for the "Favorite:" label */
+}
+
 .grid-name-cell {
     background-color: var(--neutral-bg-soft-gray);
     font-weight: var(--font-weight-bold);
