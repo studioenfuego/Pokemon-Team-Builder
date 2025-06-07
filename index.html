@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Team Builder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pokémon Team Builder</h1>
+        </header>
+        <main>
+            <div class="controls">
+                <input type="text" id="person-name" placeholder="Enter trainer's name">
+                <button id="add-person-btn">Add Person</button>
+                <button id="view-summary-btn">View Team Summary</button>
+            </div>
+            <div id="pokemon-grid-container">
+                <!-- Type headers and person rows will be injected here by JS -->
+            </div>
+        </main>
+        <!-- Modal for Pokémon Selection (initially hidden) -->
+        <div id="pokemon-selection-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span id="close-modal-btn" class="close-btn">&times;</span>
+                <h2 id="modal-title">Select Pokémon</h2>
+                <div id="modal-pokemon-list">
+                    <!-- Pokémon previews will be injected here by JS -->
+                </div>
+            </div>
+        </div>
+        <!-- Team Summary Modal -->
+        <div id="team-summary-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close-btn" id="close-summary-modal-btn">&times;</span>
+                <h2>Team Summary</h2>
+                <div id="summary-content">
+                    <!-- Team summary will be populated here by JavaScript -->
+                </div>
+                <button id="export-team-btn" class="modal-action-btn">Export to Text</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js" defer></script>
+</body>
+</html>
